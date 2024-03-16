@@ -1,0 +1,44 @@
+li > div {
+  display: flex;
+}
+img {
+  width: 100px;
+}
+.repoCard {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  height: 350px;
+  min-width: 300px;
+  max-width: 300px;
+  padding: 20px;
+  background-color: #f8f8ff;
+  margin: 6px;
+}
+.repoDetails > div > img {
+  height: 20px;
+  width: 20px;
+  margin: 5px;
+}
+.repoDetails > div {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  margin: 0;
+}
+.repoCard > h1 {
+  color: #e73959;
+}
+p {
+  margin: 0;
+}
+.repoDetails {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+.repoName {
+  font-size: 25px;
+}
