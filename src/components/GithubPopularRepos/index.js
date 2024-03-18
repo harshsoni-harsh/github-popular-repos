@@ -13,8 +13,14 @@ const languageFiltersData = [
   {id: 'CSS', language: 'CSS'},
 ]
 
+const ApiStatusConstants = {
+  success: 'SUCCESS',
+  failure: 'FAILURE',
+  inProgress: 'IN_PROGRESS',
+}
+
 class GithubPopularRepos extends Component {
-  state = {selectedId: 'ALL', isLoaded: false, apiError: false}
+  state = {selectedId: 'ALL', apiStatus: ''}
 
   repos = []
 
@@ -24,29 +30,63 @@ class GithubPopularRepos extends Component {
 
   filterClick = id => {
     this.setState(
-      {isLoaded: false, selectedId: id, apiError: false},
+      {apiStatus: ApiStatusConstants.inProgress, selectedId: id},
       this.fetchItems,
     )
   }
 
   fetchItems = async () => {
+    this.setState({apiStatus: ApiStatusConstants.inProgress})
     const {selectedId} = this.state
     const githubReposApiUrl = `https://apis.ccbp.in/popular-repos`
     const response = await fetch(
       `${githubReposApiUrl}?language=${selectedId}`,
       {method: 'GET'},
     )
-    if (response.status === 200) {
+    if (response.ok) {
       const data = await response.json()
       this.repos = data.popular_repos
+      this.setState({apiStatus: ApiStatusConstants.success})
     } else {
-      this.setState({apiError: true})
+      this.setState({apiStatus: ApiStatusConstants.failure})
     }
-    this.setState({isLoaded: true})
   }
+
+  renderBody = () => {
+    const {apiStatus} = this.state
+    switch (apiStatus) {
+      case ApiStatusConstants.failure:
+        return (
+          <div>
+            <img
+              src="https://assets.ccbp.in/frontend/react-js/api-failure-view.png"
+              alt="failure view"
+              className="failureImage"
+            />
+          </div>
+        )
+      case ApiStatusConstants.success:
+        return (
+          <ul className="repos">
+            {this.repos.map(obj => (
+              <RepositoryItem key={obj.id} itemDetails={obj} />
+            ))}
+          </ul>
+        )
+      case ApiStatusConstants.inProgress:
+        return (
+          <div data-testid="loader">
+            <Loader type="ThreeDots" color="#0284c7" height={80} width={80} />
+          </div>
+        )
+      default:
+        return null
+    }
+  }
+
   /* eslint-disable */
   render() {
-    const {selectedId, isLoaded, apiError} = this.state
+    const {selectedId, apiStatus} = this.state
     return (
       <div className="PopularRepos">
         <h1 className="heading">Popular</h1>
@@ -60,25 +100,7 @@ class GithubPopularRepos extends Component {
             />
           ))}
         </ul>
-        {isLoaded === false ? (
-          <div data-testid="loader">
-            <Loader type="ThreeDots" color="#0284c7" height={80} width={80} />
-          </div>
-        ) : apiError ? (
-          <div>
-            <img
-              src="https://assets.ccbp.in/frontend/react-js/api-failure-view.png"
-              alt="failure view"
-              className="failureImage"
-            />
-          </div>
-        ) : (
-          <ul className="repos">
-            {this.repos.map(obj => (
-              <RepositoryItem key={obj.id} itemDetails={obj} />
-            ))}
-          </ul>
-        )}
+        {this.renderBody()}
       </div>
     )
   }
